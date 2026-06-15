@@ -1,0 +1,37 @@
+# systemd unit for the hosted instance.
+#   sudo cp deploy/subscription-sweep.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now subscription-sweep
+#
+# IMPORTANT: exactly ONE uvicorn worker. Hosted state (per-session stores,
+# enrichment runs) lives in-process; multiple workers would split it.
+
+[Unit]
+Description=Subscription Sweep (hosted)
+After=network.target
+
+[Service]
+Type=exec
+User=sweep
+Group=sweep
+WorkingDirectory=/opt/subscription-sweep
+Environment=SWEEP_MODE=hosted
+Environment=SWEEP_DATA_DIR=/var/lib/subscription-sweep
+Environment=SWEEP_ALLOWED_HOSTS=sweep.example.com
+Environment=SWEEP_MAX_UPLOAD_MB=250
+Environment=SWEEP_SESSION_TTL_HOURS=24
+ExecStart=/opt/subscription-sweep/.venv/bin/python -m uvicorn server.app:app \
+    --host 127.0.0.1 --port 8765 --workers 1 --log-level warning
+Restart=on-failure
+RestartSec=3
+
+# Hardening
+StateDirectory=subscription-sweep
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/subscription-sweep
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target

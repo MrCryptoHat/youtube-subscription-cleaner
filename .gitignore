@@ -1,0 +1,17 @@
+# Your data — never leaves your machine, never committed.
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Browser profile for the unsubscribe step (holds your YouTube session)
+.cache/
+
+# Tooling / OS
+.playwright-mcp/
+.claude/
+.DS_Store
+*.log

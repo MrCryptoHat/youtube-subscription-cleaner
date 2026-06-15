@@ -1,0 +1,7 @@
+# Subscription Sweep — runtime dependencies
+# The app itself only needs FastAPI + Uvicorn. Channel enrichment is keyless
+# (stdlib urllib), so no scraping libraries and no API client.
+# The optional unsubscribe step needs Playwright; ./unsubscribe.sh installs it
+# (and its browser) lazily, so regular users never download either.
+fastapi>=0.110
+uvicorn>=0.27

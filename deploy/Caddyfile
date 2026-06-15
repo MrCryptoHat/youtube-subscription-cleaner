@@ -1,0 +1,13 @@
+# Subscription Sweep — hosted mode behind Caddy (automatic HTTPS).
+# Replace sweep.example.com with your domain and reload Caddy.
+
+sweep.example.com {
+	encode zstd gzip
+
+	# Mirror SWEEP_MAX_UPLOAD_MB (defense in depth for the upload endpoint).
+	request_body {
+		max_size 250MB
+	}
+
+	reverse_proxy 127.0.0.1:8765
+}

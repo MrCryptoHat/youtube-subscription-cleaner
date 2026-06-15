@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscription Sweep — bulk-clean your YouTube subscriptions</title>
+<meta name="description" content="Clean up years of YouTube subscriptions in minutes. Every channel is scored by how much you actually watch — swipe to keep or remove, then bulk-unsubscribe. No API key. Open source, local-first.">
+<meta name="theme-color" content="#0a0908">
+<link rel="canonical" href="https://github.com/MrCryptoHat/youtube-subscription-cleaner">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Subscription Sweep">
+<meta property="og:title" content="Subscription Sweep — bulk-clean your YouTube subscriptions">
+<meta property="og:description" content="Sort years of YouTube subscriptions in minutes — every channel scored by how much you actually watch. Swipe to keep or remove, then bulk-unsubscribe. No API key, open source.">
+<meta property="og:image" content="/static/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="Swipe interface ranking YouTube subscriptions by your own watch history">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- atmosphere layers -->
+<div class="atmosphere"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<!-- language switcher (dropdown — populated from LANGUAGES in i18n.js) -->
+<div class="lang-switch" id="lang-switch">
+  <button class="lang-current" id="lang-current" type="button" aria-haspopup="listbox" aria-expanded="false" title="Язык / Language">
+    <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>
+    <span class="lang-code" id="lang-code">РУ</span>
+    <svg class="lang-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <ul class="lang-menu" id="lang-menu" role="listbox" hidden></ul>
+</div>
+
+<!-- ─────────── LOADING ─────────── -->
+<section id="view-loading" class="view active center">
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>…</p>
+  </div>
+</section>
+
+<!-- ─────────── WELCOME ─────────── -->
+<section id="view-welcome" class="view">
+  <div class="page narrow">
+    <div class="brand big">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-name">Subscription <em>Sweep</em></div>
+        <div class="brand-tag" data-i18n="brand.tag.welcome">Tidy your YouTube subscriptions</div>
+      </div>
+    </div>
+
+    <h1 class="display" data-i18n-html="welcome.headline">Years of subscriptions,<br>sorted in a few minutes.</h1>
+    <p class="lede" data-i18n-html="welcome.lede"></p>
+
+    <div class="feature-row">
+      <div class="feature">
+        <div class="feature-ico">⌁</div>
+        <div class="feature-k" data-i18n="welcome.f1.k">No API key</div>
+        <div class="feature-v" data-i18n="welcome.f1.v">Nothing to set up in Google Cloud. Just your Takeout export.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">⌂</div>
+        <div class="feature-k" data-i18n="welcome.f2.k">100% local</div>
+        <div class="feature-v" data-i18n="welcome.f2.v">Runs on your machine. Your data never leaves it.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">↺</div>
+        <div class="feature-k" data-i18n="welcome.f3.k">Resumable</div>
+        <div class="feature-v" data-i18n="welcome.f3.v">Stop any time. Your progress is saved automatically.</div>
+      </div>
+    </div>
+
+    <button id="btn-welcome-next" class="btn-cta"><span data-i18n="welcome.cta">Get started</span> <span class="cta-arr">→</span></button>
+
+    <a class="privacy-link" href="/privacy" target="_blank" rel="noopener" data-i18n="footer.privacy">Privacy &amp; data</a>
+  </div>
+</section>
+
+<!-- ─────────── IMPORT (Takeout) ─────────── -->
+<section id="view-import" class="view">
+  <div class="page">
+    <div class="step-head">
+      <span class="step-num">01</span>
+      <div>
+        <h2 class="step-title" data-i18n="import.title">Load your YouTube history</h2>
+        <p class="step-sub" data-i18n-html="import.sub"></p>
+      </div>
+    </div>
+
+    <div class="import-grid">
+      <ol class="howto">
+        <li><span class="howto-n">1</span><div data-i18n-html="import.s1"></div></li>
+        <li><span class="howto-n">2</span><div data-i18n-html="import.s2"></div></li>
+        <li><span class="howto-n">3</span><div data-i18n-html="import.s3"></div></li>
+        <li><span class="howto-n">4</span><div data-i18n-html="import.s4"></div></li>
+      </ol>
+
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" accept=".zip,.csv,.json,.html" multiple hidden>
+        <div class="dz-inner" id="dz-inner">
+          <div class="dz-ico">⇪</div>
+          <div class="dz-title" data-i18n-html="import.dz_title">Drop your Takeout <b>.zip</b> here</div>
+          <div class="dz-or"><span data-i18n="import.dz_or">or</span> <button class="link-btn" id="dz-browse" data-i18n="import.dz_browse">browse files</button></div>
+          <div class="dz-note" data-i18n-html="import.dz_note"></div>
+        </div>
+        <div class="dz-progress" id="dz-progress" hidden>
+          <div class="spinner small"></div>
+          <span id="dz-progress-text">…</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detected" id="detected" hidden>
+      <div class="detected-row">
+        <span class="det-check">✓</span>
+        <span><b id="det-subs">0</b> <span id="det-subs-label" data-i18n="import.det_subs">subscriptions</span></span>
+        <span id="det-watch-wrap"><span class="det-sep">·</span>
+        <span><b id="det-watch">0</b> <span data-i18n="import.det_watch">watched videos in your history</span></span></span>
+      </div>
+      <div class="detected-warn" id="det-warn" hidden></div>
+    </div>
+
+    <div class="import-foot">
+      <button id="btn-build" class="btn-cta" disabled><span data-i18n="import.build">Build my library</span> <span class="cta-arr">→</span></button>
+      <p class="footnote" data-i18n="import.privacy">Files are parsed locally and never uploaded.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── ENRICH (progress) ─────────── -->
+<section id="view-enrich" class="view center">
+  <div class="page narrow center-text">
+    <div class="enrich-ring">
+      <svg viewBox="0 0 120 120" class="enrich-svg">
+        <circle class="er-track" cx="60" cy="60" r="52"></circle>
+        <circle class="er-fill" id="er-fill" cx="60" cy="60" r="52"></circle>
+      </svg>
+      <div class="enrich-pct"><span id="enrich-pct">0</span><i>%</i></div>
+    </div>
+    <h2 class="step-title" data-i18n="enrich.title">Looking up your channels</h2>
+    <p class="step-sub" data-i18n="enrich.sub"></p>
+    <div class="enrich-count"><b id="enrich-done">0</b> / <span id="enrich-total">0</span> <span data-i18n="enrich.channels">channels</span></div>
+    <button id="btn-enrich-skip" class="btn-ghost" data-i18n="enrich.skip" hidden>Start sorting now →</button>
+  </div>
+</section>
+
+<!-- ─────────── PLAN ─────────── -->
+<section id="view-plan" class="view">
+  <div class="page">
+    <div class="step-head">
+      <span class="step-num">02</span>
+      <div>
+        <h2 class="step-title" data-i18n="plan.title">What should we go through?</h2>
+        <p class="step-sub"><span data-i18n="plan.sub_pre">You have</span> <b id="plan-total">—</b> <span data-i18n="plan.sub_post">subscriptions.</span></p>
+      </div>
+      <div class="plan-actions">
+        <button id="btn-plan-resume" class="btn-ghost sm" data-i18n="plan.resume" hidden>← Resume sorting</button>
+        <button id="btn-reimport" class="btn-ghost sm" data-i18n="plan.reimport">↻ Load a different export</button>
+      </div>
+    </div>
+
+    <div class="zones">
+      <label class="zone-card" data-zone="yellow">
+        <input type="checkbox" id="opt-yellow" checked>
+        <span class="zone-check"></span>
+        <span class="zone-dot zone-yellow-bg"></span>
+        <div class="zone-body">
+          <div class="zone-line">
+            <span class="zone-name" data-i18n="plan.yellow.name">Needs a look</span>
+            <span class="zone-count"><b id="count-yellow">—</b></span>
+            <span class="zone-eta" id="eta-yellow">~10 min</span>
+            <span class="zone-tag tag-must" data-i18n="plan.yellow.tag">recommended</span>
+          </div>
+          <div class="zone-desc" data-i18n="plan.yellow.desc"></div>
+        </div>
+      </label>
+
+      <label class="zone-card" data-zone="red">
+        <input type="checkbox" id="opt-red" checked>
+        <span class="zone-check"></span>
+        <span class="zone-dot zone-red-bg"></span>
+        <div class="zone-body">
+          <div class="zone-line">
+            <span class="zone-name" data-i18n="plan.red.name">Probably dead</span>
+            <span class="zone-count"><b id="count-red">—</b></span>
+            <span class="zone-eta" id="eta-red">~6 min</span>
+            <span class="zone-tag tag-maybe" data-i18n="plan.red.tag">spot-check</span>
+          </div>
+          <div class="zone-desc" data-i18n="plan.red.desc"></div>
+          <div class="red-mode" id="red-mode">
+            <label class="radio"><input type="radio" name="red-mode" value="sample" checked><span class="radio-dot"></span><span class="radio-label" data-i18n="plan.red.sample">Sample 30 at random</span></label>
+            <label class="radio"><input type="radio" name="red-mode" value="all"><span class="radio-dot"></span><span class="radio-label" data-i18n="plan.red.all">Review all of them</span></label>
+          </div>
+        </div>
+      </label>
+
+      <label class="zone-card" data-zone="green">
+        <input type="checkbox" id="opt-green">
+        <span class="zone-check"></span>
+        <span class="zone-dot zone-green-bg"></span>
+        <div class="zone-body">
+          <div class="zone-line">
+            <span class="zone-name" data-i18n="plan.green.name">Keepers</span>
+            <span class="zone-count"><b id="count-green">—</b></span>
+            <span class="zone-eta" id="eta-green">~5 min</span>
+            <span class="zone-tag tag-skip" data-i18n="plan.green.tag">rarely needed</span>
+          </div>
+          <div class="zone-desc" data-i18n="plan.green.desc"></div>
+        </div>
+      </label>
+
+      <div class="zone-card ghost">
+        <span class="zone-check disabled">⚙</span>
+        <span class="zone-dot zone-dead-bg"></span>
+        <div class="zone-body">
+          <div class="zone-line">
+            <span class="zone-name" data-i18n="plan.dead.name">Gone from YouTube</span>
+            <span class="zone-count"><b id="count-dead">—</b></span>
+            <span class="zone-tag tag-auto" data-i18n="plan.dead.tag">auto · no swiping</span>
+          </div>
+          <div class="zone-desc" data-i18n="plan.dead.desc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-foot">
+      <div class="plan-summary"><span data-i18n="plan.queue_pre">In your queue:</span> <b id="queue-count">—</b> <span data-i18n="plan.queue_mid">channels · about</span> <b id="queue-eta">—</b></div>
+      <button id="btn-start" class="btn-cta"><span data-i18n="plan.start">Start sorting</span> <span class="cta-arr">→</span></button>
+    </div>
+    <p class="footnote" id="window-note"></p>
+  </div>
+</section>
+
+<!-- ─────────── RESUME ─────────── -->
+<section id="view-resume" class="view center">
+  <div class="page narrow center-text">
+    <h1 class="display sm" data-i18n="resume.title">Welcome back.</h1>
+    <p class="lede" id="resume-progress">—</p>
+    <div class="resume-actions">
+      <button id="btn-resume" class="btn-cta"><span data-i18n="resume.continue">Continue</span> <span class="cta-arr">→</span></button>
+      <button id="btn-view-decisions" class="btn-ghost" data-i18n="resume.review">Review decisions</button>
+      <button id="btn-restart" class="btn-danger" data-i18n="resume.restart">Start over</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── SWIPE ─────────── -->
+<section id="view-swipe" class="view">
+  <header class="topbar">
+    <div class="brand brand-home" id="swipe-brand" role="button" tabindex="0" data-i18n-title="nav.home_title" title="Change selection / load a different file">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-name">Subscription <em>Sweep</em></div>
+        <div class="brand-tag" data-i18n="brand.tag.triage">Triage mode</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <div class="progress-count"><b id="progress-current">0</b> / <span id="progress-total">0</span> <span class="muted" data-i18n="swipe.reviewed">reviewed</span></div>
+        <div class="progress-pct"><span id="progress-eta">—</span></div>
+      </div>
+      <div class="track"><div class="track-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="session">
+      <div class="session-stat kept">
+        <div class="n"><span class="session-dot"></span><span id="stat-kept">0</span></div>
+        <div class="l" data-i18n="swipe.kept">Kept</div>
+      </div>
+      <div class="session-div"></div>
+      <div class="session-stat removed">
+        <div class="n"><span class="session-dot"></span><span id="stat-removed">0</span></div>
+        <div class="l" data-i18n="swipe.removed">Removed</div>
+      </div>
+      <div class="session-div"></div>
+      <button id="btn-finish" class="btn-ghost sm" data-i18n="swipe.finish">Finish →</button>
+    </div>
+  </header>
+
+  <section class="stage">
+    <div class="card-deck" id="card-deck"></div>
+  </section>
+
+  <nav class="dock">
+    <button class="btn btn-primary btn-remove" data-action="remove">
+      <span class="btn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </span>
+      <span class="btn-text"><span class="bt-main" data-i18n="dock.remove">Remove</span><span class="bt-sub" data-i18n="dock.remove_sub">Unsubscribe</span></span>
+      <span class="kbd">←</span>
+    </button>
+
+    <div class="dock-mid">
+      <button class="btn-mid" id="btn-undo-mid" data-action="undo">
+        <span class="kbd">↑</span>
+        <span class="bm-label" data-i18n="dock.undo">Undo</span>
+      </button>
+      <button class="btn-mid" data-action="skip">
+        <span class="kbd">↓</span>
+        <span class="bm-label" data-i18n="dock.skip">Skip</span>
+      </button>
+    </div>
+
+    <button class="btn btn-primary btn-keep" data-action="keep">
+      <span class="btn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </span>
+      <span class="btn-text"><span class="bt-main" data-i18n="dock.keep">Keep</span><span class="bt-sub" data-i18n="dock.keep_sub">Stay subscribed</span></span>
+      <span class="kbd">→</span>
+    </button>
+  </nav>
+
+  <div class="footer-hint">
+    <span data-i18n="hint.drag">Drag the card, or use</span> <span class="mini-kbd">←</span> <span class="mini-kbd">→</span> <span class="mini-kbd">↑</span> <span class="mini-kbd">↓</span>
+    <span class="hint-sep">·</span>
+    <button id="btn-help" class="hint-btn"><span class="mini-kbd">?</span> <span data-i18n="hint.help">Help</span></button>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+</section>
+
+<!-- ─────────── REVIEW ─────────── -->
+<section id="view-review" class="view">
+  <header class="topbar simple">
+    <div>
+      <h2 class="step-title sm" data-i18n="review.title">Final check</h2>
+      <div class="step-sub" id="review-sub">—</div>
+    </div>
+    <button id="btn-back-swipe" class="btn-ghost sm" data-i18n="review.back">← Back to sorting</button>
+    <button id="btn-review-home" class="btn-ghost sm" data-i18n="nav.plan">↩ Change selection</button>
+  </header>
+
+  <div class="review-tabs">
+    <button class="tab active" data-tab="remove"><span data-i18n="tab.remove">Removing</span> <span class="tab-count" id="tab-count-remove">0</span></button>
+    <button class="tab" data-tab="keep"><span data-i18n="tab.keep">Keeping</span> <span class="tab-count" id="tab-count-keep">0</span></button>
+    <button class="tab" data-tab="pending"><span data-i18n="tab.pending">Undecided</span> <span class="tab-count" id="tab-count-pending">0</span></button>
+    <button class="tab tab-gone" data-tab="gone"><span data-i18n="tab.gone">Gone from YouTube</span> <span class="tab-count" id="tab-count-gone">0</span></button>
+  </div>
+
+  <div class="review-controls">
+    <input id="review-search" data-i18n-ph="review.search_ph" placeholder="Search channels…">
+    <label class="review-sort-wrap">
+      <span class="review-sort-label" data-i18n="sort.label">Sort</span>
+      <select id="review-sort" class="review-sort">
+        <option value="alpha" data-i18n="sort.alpha">A–Z</option>
+        <option value="subs" data-i18n="sort.subs">Most subscribers</option>
+        <option value="watched" data-i18n="sort.watched">Most watched by you</option>
+        <option value="recent" data-i18n="sort.recent">Latest upload</option>
+      </select>
+    </label>
+    <div class="bulk">
+      <button id="btn-bulk-keep" class="btn-ghost sm" data-i18n="review.bulk_keep">Keep all shown</button>
+      <button id="btn-bulk-remove" class="btn-ghost sm" data-i18n="review.bulk_remove">Remove all shown</button>
+      <button id="btn-bulk-reset" class="btn-ghost sm" data-i18n="review.bulk_reset">Reset all shown</button>
+    </div>
+  </div>
+
+  <div id="review-gone-note" class="review-gone-note" hidden data-i18n="review.gone_note"></div>
+
+  <div id="review-list" class="review-list"></div>
+
+  <footer class="review-foot">
+    <div class="rf-note" id="rf-note"></div>
+    <button id="btn-export" class="btn-cta"><span data-i18n="review.export">Export my list →</span></button>
+  </footer>
+</section>
+
+<!-- ─────────── DONE ─────────── -->
+<section id="view-done" class="view center">
+  <div class="page center-text">
+    <h1 class="display" data-i18n="done.title">Swept.</h1>
+    <p class="lede" id="done-summary">—</p>
+    <p class="done-pick" data-i18n="done.pick">Now actually unsubscribe — pick whatever fits you:</p>
+
+    <div class="done-ways">
+      <div class="way">
+        <div class="way-h" data-i18n="done.way_manual_h">Do it yourself in the browser</div>
+        <p class="way-d" data-i18n="done.way_manual_d"></p>
+        <div class="way-dl">
+          <button id="btn-open-unsub" class="btn-cta"><span data-i18n="done.way_manual_btn">Open the unsubscribe page</span> <span class="cta-arr">→</span></button>
+          <a id="btn-dl-html" class="link-btn" download="unsubscribe.html" data-i18n="done.way_manual_dl">download a standalone .html</a>
+        </div>
+      </div>
+      <div class="way">
+        <div class="way-h" data-i18n="done.way_agent_h">Hand it to your AI agent</div>
+        <p class="way-d" data-i18n="done.way_agent_d"></p>
+        <a id="btn-brief" class="btn-ghost" href="/api/export/brief.md" data-i18n="done.way_agent_btn">Download the agent brief</a>
+      </div>
+      <div class="way">
+        <div class="way-h" data-i18n="done.way_script_h">Write your own script</div>
+        <p class="way-d" data-i18n="done.way_script_d"></p>
+        <div class="way-dl">
+          <a id="btn-json" class="btn-ghost" href="/api/export/unsubscribe.json" data-i18n="done.way_script_btn">Download unsubscribe.json</a>
+          <a id="btn-download" class="link-btn" href="/api/export" download="decisions.json" data-i18n="done.download">full decisions.json</a>
+        </div>
+      </div>
+    </div>
+
+    <details class="done-auto local-only">
+      <summary data-i18n="done.auto_h">Or try the built-in automation</summary>
+      <p data-i18n-html="done.auto_body"></p>
+      <pre class="cmd"><code>./unsubscribe.sh</code></pre>
+      <p class="done-fineprint" data-i18n="done.fineprint"></p>
+    </details>
+
+    <p class="done-fineprint hosted-only" data-i18n-html="done.hosted_auto"></p>
+
+    <button id="btn-back-review" class="btn-ghost" data-i18n="done.back">← Back to the list</button>
+  </div>
+</section>
+
+<!-- ─────────── UNSUBSCRIBE (in-app) ─────────── -->
+<section id="view-unsubscribe" class="view">
+  <header class="topbar simple">
+    <div>
+      <h2 class="step-title sm" data-i18n="unsub.title">Unsubscribe</h2>
+      <div class="step-sub" data-i18n="unsub.lead"></div>
+    </div>
+    <a id="unsub-download" class="btn-ghost sm" download="unsubscribe.html" data-i18n="unsub.download">↓ Standalone .html</a>
+    <button id="btn-unsub-back" class="btn-ghost sm" data-i18n="unsub.back">← Back</button>
+  </header>
+
+  <div class="unsub-bar">
+    <span class="unsub-count"><b id="unsub-done">0</b> / <span id="unsub-total">0</span> <span data-i18n="unsub.progress">done</span></span>
+    <div class="unsub-track"><div class="unsub-fill" id="unsub-fill"></div></div>
+  </div>
+
+  <div class="review-controls">
+    <input id="unsub-search" data-i18n-ph="unsub.search" placeholder="Search channels…">
+    <label class="opts"><input type="checkbox" id="unsub-automark"> <span data-i18n="unsub.automark">Tick off when opened</span></label>
+    <label class="opts"><input type="checkbox" id="unsub-hide"> <span data-i18n="unsub.hide">Hide done</span></label>
+  </div>
+
+  <div class="unsub-alldone" id="unsub-alldone" hidden data-i18n="unsub.all_done"></div>
+  <div id="unsub-list" class="review-list"></div>
+</section>
+
+<!-- ─────────── HELP DIALOG ─────────── -->
+<dialog id="dialog-help">
+  <h3 data-i18n="help.title">Keyboard</h3>
+  <table>
+    <tr><td><kbd>←</kbd></td><td data-i18n="help.remove">Remove &amp; next</td></tr>
+    <tr><td><kbd>→</kbd></td><td data-i18n="help.keep">Keep &amp; next</td></tr>
+    <tr><td><kbd>↓</kbd> / <kbd>Space</kbd></td><td data-i18n="help.skip">Skip (comes back later)</td></tr>
+    <tr><td><kbd>↑</kbd> / <kbd>U</kbd></td><td data-i18n="help.undo">Undo last decision</td></tr>
+    <tr><td><kbd>↵</kbd></td><td data-i18n="help.open">Open channel on YouTube</td></tr>
+    <tr><td><kbd>F</kbd></td><td data-i18n="help.finish">Finish &amp; review</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td data-i18n="help.close_row">Close this</td></tr>
+  </table>
+  <form method="dialog"><button class="btn-ghost" data-i18n="help.close">Close</button></form>
+</dialog>
+
+<!-- ─────────── CONFIRM (in-style replacement for window.confirm) ─────────── -->
+<dialog id="dialog-confirm" class="confirm-dialog">
+  <h3 id="confirm-title" hidden></h3>
+  <p id="confirm-message"></p>
+  <div class="confirm-actions">
+    <button id="confirm-cancel" class="btn-ghost"></button>
+    <button id="confirm-ok" class="btn-cta"></button>
+  </div>
+</dialog>
+
+<div id="enrich-badge" class="enrich-badge" hidden>
+  <span class="eb-spin" aria-hidden="true"></span>
+  <span class="eb-text"></span>
+</div>
+
+<div id="sr-live" class="sr-only" aria-live="polite" role="status"></div>
+
+<script src="/static/i18n.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

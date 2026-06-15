@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy & data — Subscription Sweep</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<style>
+  :root { --bg:#0a0908; --card:#16130f; --line:rgba(232,215,188,0.12); --fg:#efe7d8;
+          --dim:#b8ad99; --faint:#756c5c; --ember:#ff7a3d; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.65 "Space Grotesk",system-ui,sans-serif;
+         padding:48px 20px 90px; }
+  .wrap { max-width:680px; margin:0 auto; }
+  h1 { font-size:26px; margin-bottom:6px; }
+  h2 { font-size:17px; margin:30px 0 8px; color:var(--fg); }
+  p, li { color:var(--dim); }
+  ul { padding-left:20px; margin:8px 0; }
+  a { color:var(--ember); }
+  .muted { color:var(--faint); font-size:13px; }
+  hr { border:none; border-top:1px solid var(--line); margin:40px 0; }
+  code { background:var(--card); border:1px solid var(--line); border-radius:6px; padding:1px 6px; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Privacy &amp; data</h1>
+  <p class="muted">Subscription Sweep — open source, no accounts, no analytics, no trackers.</p>
+
+  <h2>If you run it locally (<code>./start.sh</code>)</h2>
+  <ul>
+    <li>Everything stays on your machine, in the project's <code>data/</code> folder. Nothing is uploaded anywhere.</li>
+    <li>The only network requests are to <b>public</b> YouTube channel pages and RSS feeds, to check whether channels are still alive (no login, no API key, no cookies sent).</li>
+  </ul>
+
+  <h2>If you use the hosted instance</h2>
+  <ul>
+    <li><b>What is processed:</b> your Google Takeout file is parsed in memory to extract your subscription list and per-channel watch <i>aggregates</i> (how many videos, how recently). The raw upload is not kept.</li>
+    <li><b>What is stored:</b> only the derived channel list and your keep/remove decisions, in an isolated per-session folder keyed by a random cookie. Raw watch-history events are never written to disk.</li>
+    <li><b>Retention:</b> your session data is deleted automatically after <b>24 hours of inactivity</b>, or immediately when you use “Load a different export” / reset. The cookie holds no personal data — just a random id.</li>
+    <li><b>Enrichment:</b> channel liveness checks run from the server, so YouTube never sees your IP. Public channel info (title, avatar, last-upload date) is cached server-side per channel — that cache contains nothing about you.</li>
+    <li><b>No accounts, no analytics, no third parties.</b> The server keeps standard error logs only.</li>
+  </ul>
+
+  <h2>Prefer zero trust?</h2>
+  <p>Run the exact same code on your machine — it's one command and fully local:</p>
+  <p><code>git clone … &amp;&amp; ./start.sh</code> — see the <a href="https://github.com/MrCryptoHat/youtube-subscription-cleaner" rel="noopener">repository</a>.</p>
+
+  <hr>
+
+  <h1 lang="ru">Приватность и данные</h1>
+  <p class="muted" lang="ru">Subscription Sweep — открытый код, без аккаунтов, аналитики и трекеров.</p>
+
+  <h2 lang="ru">Если запускаешь локально (<code>./start.sh</code>)</h2>
+  <ul lang="ru">
+    <li>Всё остаётся на твоём компьютере, в папке <code>data/</code> проекта. Ничего никуда не загружается.</li>
+    <li>Единственные сетевые запросы — к <b>публичным</b> страницам и RSS-лентам каналов YouTube, чтобы проверить, живы ли каналы (без логина, ключей и куки).</li>
+  </ul>
+
+  <h2 lang="ru">Если пользуешься онлайн-версией</h2>
+  <ul lang="ru">
+    <li><b>Что обрабатывается:</b> файл Google Takeout разбирается в памяти — извлекаются список подписок и <i>агрегаты</i> по каналам (сколько видео смотрел и как давно). Сам загруженный файл не сохраняется.</li>
+    <li><b>Что хранится:</b> только полученный список каналов и твои решения «оставить/убрать», в изолированной папке сессии по случайной куке. Сырая история просмотров на диск не пишется.</li>
+    <li><b>Срок хранения:</b> данные сессии удаляются автоматически через <b>24 часа неактивности</b> — или сразу, если нажать «загрузить другой экспорт» / сброс. Кука не содержит личных данных — только случайный id.</li>
+    <li><b>Обогащение:</b> проверка каналов идёт с сервера, твой IP YouTube не видит. Публичная информация о каналах кэшируется на сервере поканально — в этом кэше нет ничего о тебе.</li>
+    <li><b>Без аккаунтов, аналитики и третьих сторон.</b> Сервер ведёт только стандартные логи ошибок.</li>
+  </ul>
+
+  <h2 lang="ru">Не хочешь доверять серверу?</h2>
+  <p lang="ru">Запусти тот же код у себя — одна команда, всё локально: <a href="https://github.com/MrCryptoHat/youtube-subscription-cleaner" rel="noopener">репозиторий</a>.</p>
+</div>
+</body>
+</html>
